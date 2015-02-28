@@ -1,12 +1,6 @@
-# import json
 from django.db.models.loading import get_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models.fields import EmailField
-
-# from http://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-camel-case
-# def convert(name):
-    # s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    # return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 def convert(name):
     return name.replace('_', ' ').capitalize()
@@ -32,10 +26,10 @@ bs_field = """\
 """
 
 bs_input = """\
-      <input type="%(input_type)s" class="form-control" id="%(id)s"/>"""
+      <input type="%(input_type)s" name="%(name)s" class="form-control" id="%(id)s"/>"""
 
 bs_select = """\
-      <select class="form-control" id="%(id)s">%(options)s
+      <select name="%(name)s" class="form-control" id="%(id)s">%(options)s
       </select>"""
 
 bs_option = """
@@ -49,17 +43,20 @@ def format_bs_field(model_name, field):
     if field.choices:
         field_html = bs_select % {
             'id': field_id_html,
-            'options': "".join([bs_option % {'value': value, 'label': label} for value, label in field.choices])
+            'options': "".join([bs_option % {'value': value, 'label': label} for value, label in field.choices]),
+            'name': field.name,
         }
     elif isinstance(field, EmailField):
         field_html = bs_input % {
             'id': field_id_html,
-            'input_type': 'email'
+            'input_type': 'email',
+            'name': field.name,
         }
     else:
         field_html = bs_input % {
             'id': field_id_html,
-            'input_type': 'text'
+            'input_type': 'text',
+            'name': field.name,
         }
 
     return bs_field % {
