@@ -1,7 +1,7 @@
 from optparse import make_option
 from django.db.models.loading import get_model
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models.fields import EmailField
+from django.db.models.fields import EmailField, BooleanField
 
 def convert(name):
     return name.replace('_', ' ').capitalize()
@@ -27,7 +27,7 @@ bs_field = """\
 """
 
 bs_input = """\
-      <input type="%(input_type)s" %(name_attr)s="%(name)s" class="form-control" id="%(id)s" %(extra)s/>"""
+      <input type="%(input_type)s" %(name_attr)s="%(name)s"%(class)s id="%(id)s" %(extra)s/>"""
 
 bs_select = """\
       <select %(name_attr)s="%(name)s" class="form-control" id="%(id)s">%(options)s
@@ -42,10 +42,8 @@ def format_bs_field(model_name, field, flavour):
     field_id_html = model_name + '-' + field.name
     if flavour == 'react':
         name_attr = 'ref'
-        extra = 'defaultValue={this.props.data.' + field.name + '}'
     else:
         name_attr = 'name'
-        extra = ''
 
     if field.choices:
         field_html = bs_select % {
@@ -54,20 +52,31 @@ def format_bs_field(model_name, field, flavour):
             'name': field.name,
             'name_attr': name_attr,
         }
-    elif isinstance(field, EmailField):
-        field_html = bs_input % {
-            'id': field_id_html,
-            'input_type': 'email',
-            'name': field.name,
-            'name_attr': name_attr,
-            'extra': extra,
-        }
     else:
+        if flavour == 'react':
+            if isinstance(field, BooleanField):
+                extra = 'defaultChecked={this.props.data.' + field.name + '}'
+            else:
+                extra = 'defaultValue={this.props.data.' + field.name + '}'
+        else:
+            extra = ''
+
+        if isinstance(field, EmailField):
+            input_type = 'email'
+            class_fullstr = 'class="form-control"'
+        elif isinstance(field, BooleanField):
+            input_type = 'checkbox'
+            class_fullstr = ''
+        else:
+            input_type = 'text'
+            class_fullstr = 'class="form-control"'
+
         field_html = bs_input % {
             'id': field_id_html,
-            'input_type': 'text',
-            'name': field.name,
+            'input_type': input_type,
             'name_attr': name_attr,
+            'name': field.name,
+            'class': class_fullstr,
             'extra': extra,
         }
 
