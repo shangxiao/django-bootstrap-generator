@@ -27,10 +27,10 @@ bs_field = """\
 """
 
 bs_input = """\
-      <input type="%(input_type)s" %(name_attr)s="%(name)s"%(class)s id="%(id)s" %(extra)s/>"""
+      <input type="%(input_type)s" %(name_attr)s="%(name)s"%(class)s id="%(id)s"%(extra)s/>"""
 
 bs_select = """\
-      <select %(name_attr)s="%(name)s" class="form-control" id="%(id)s">%(options)s
+      <select %(name_attr)s="%(name)s" class="form-control" id="%(id)s"%(extra)s>%(options)s
       </select>"""
 
 bs_option = """
@@ -38,12 +38,17 @@ bs_option = """
 
 
 def format_bs_field(model_name, field, flavour):
-
     field_id_html = model_name + '-' + field.name
+
     if flavour == 'react':
         name_attr = 'ref'
+        if isinstance(field, BooleanField):
+            extra = ' defaultChecked={this.props.data.' + field.name + '}'
+        else:
+            extra = ' defaultValue={this.props.data.' + field.name + '}'
     else:
         name_attr = 'name'
+        extra = ''
 
     if field.choices:
         field_html = bs_select % {
@@ -51,16 +56,9 @@ def format_bs_field(model_name, field, flavour):
             'options': "".join([bs_option % {'value': value, 'label': label} for value, label in field.choices]),
             'name': field.name,
             'name_attr': name_attr,
+            'extra': extra,
         }
     else:
-        if flavour == 'react':
-            if isinstance(field, BooleanField):
-                extra = 'defaultChecked={this.props.data.' + field.name + '}'
-            else:
-                extra = 'defaultValue={this.props.data.' + field.name + '}'
-        else:
-            extra = ''
-
         if isinstance(field, EmailField):
             input_type = 'email'
             class_fullstr = 'class="form-control"'
