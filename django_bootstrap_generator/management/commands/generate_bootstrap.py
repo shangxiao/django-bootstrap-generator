@@ -71,13 +71,13 @@ def format_bs_field(model_name, field, flavour):
     else:
         if isinstance(field, EmailField):
             input_type = 'email'
-            class_fullstr = 'class="form-control"'
+            class_fullstr = ' class="form-control"'
         elif isinstance(field, BooleanField):
             input_type = 'checkbox'
             class_fullstr = ''
         else:
             input_type = 'text'
-            class_fullstr = 'class="form-control"'
+            class_fullstr = ' class="form-control"'
 
         field_html = bs_input % {
             'id': field_id_html,
