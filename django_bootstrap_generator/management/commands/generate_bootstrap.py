@@ -1,3 +1,5 @@
+import collections
+import types
 from optparse import make_option
 from django.db.models.loading import get_model
 from django.core.management.base import BaseCommand, CommandError
@@ -36,9 +38,22 @@ bs_select = """\
 bs_option = """
         <option value="%(value)s">%(label)s</option>"""
 
+optgroup = """
+        <optgroup label="%(label)s">%(options)s
+        </optgroup>"""
+
 bs_textarea = """\
       <textarea %(name_attr)s="%(name)s" class="form-control" id="%(id)s"%(extra)s></textarea>"""
 
+
+def format_choice(key, val):
+    if isinstance(val, collections.Iterable) and not isinstance(val, types.StringTypes):
+        return optgroup % {
+            'label': key,
+            'options': ''.join([bs_option % {'value': value, 'label': label} for value, label in val])
+        }
+    else:
+        return bs_option % {'value': key, 'label': val}
 
 def format_bs_field(model_name, field, flavour):
     field_id_html = model_name + '-' + field.name
@@ -56,7 +71,7 @@ def format_bs_field(model_name, field, flavour):
     if field.choices:
         field_html = bs_select % {
             'id': field_id_html,
-            'options': "".join([bs_option % {'value': value, 'label': label} for value, label in field.choices]),
+            'options': "".join([format_choice(value, label) for value, label in field.choices]),
             'name': field.name,
             'name_attr': name_attr,
             'extra': extra,
