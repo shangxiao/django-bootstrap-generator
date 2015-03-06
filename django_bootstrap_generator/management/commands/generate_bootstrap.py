@@ -3,7 +3,7 @@ import types
 from optparse import make_option
 from django.db.models.loading import get_model
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models.fields import EmailField, BooleanField, TextField
+from django.db.models.fields import EmailField, URLField, BooleanField, TextField
 
 def convert(name):
     return name.replace('_', ' ').capitalize()
@@ -86,6 +86,9 @@ def format_bs_field(model_name, field, flavour):
     else:
         if isinstance(field, EmailField):
             input_type = 'email'
+            class_fullstr = ' class="form-control"'
+        elif isinstance(field, URLField):
+            input_type = 'url'
             class_fullstr = ' class="form-control"'
         elif isinstance(field, BooleanField):
             input_type = 'checkbox'
