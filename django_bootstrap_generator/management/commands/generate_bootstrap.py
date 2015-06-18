@@ -64,9 +64,9 @@ def format_bs_field(model_name, field, flavour):
     if flavour == 'react':
         name_attr = 'ref'
         if isinstance(field, BooleanField):
-            extra = ' defaultChecked={this.props.data.' + field.name + '}'
+            extra = ' defaultChecked={this.state.data.' + field.name + '}'
         else:
-            extra = ' defaultValue={this.props.data.' + field.name + '}'
+            extra = ' defaultValue={this.state.data.' + field.name + '}'
     else:
         name_attr = 'name'
         extra = ''
