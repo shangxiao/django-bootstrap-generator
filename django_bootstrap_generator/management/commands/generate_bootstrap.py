@@ -23,7 +23,7 @@ bs_field = """\
   <div class="form-group">
     <label for="%(id)s" class="col-sm-2 control-label">%(label)s</label>
     <div class="col-sm-10">
-%(field)s
+%(field)s%(error)s
     </div>
   </div>
 """
@@ -44,6 +44,9 @@ optgroup = """
 
 bs_textarea = """\
       <textarea %(name_attr)s="%(name)s" class="form-control" id="%(id)s"%(extra)s></textarea>"""
+
+react_error = """
+      {errors.%(name)s}"""
 
 
 def format_choice(key, val):
@@ -106,11 +109,22 @@ def format_bs_field(model_name, field, flavour):
             'extra': extra,
         }
 
-    return bs_field % {
+    if flavour == 'react':
+        error = react_error % {
+            'name': field.name,
+        }
+
+    rendered_html = bs_field % {
         'id': field_id_html,
         'label': convert(field.name),
         'field': field_html,
+        'error': error,
     }
+
+    if flavour == 'react':
+        rendered_html = rendered_html.replace('class="col-sm-10"', 'class={"col-sm-10 " + errorClasses.' + field.name + '}')
+
+    return rendered_html
 
 class Command(BaseCommand):
     args = '<app_name> <model_name>'
