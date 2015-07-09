@@ -113,6 +113,8 @@ def format_bs_field(model_name, field, flavour):
         error = react_error % {
             'name': field.name,
         }
+    else:
+        error = ''
 
     rendered_html = bs_field % {
         'id': field_id_html,
