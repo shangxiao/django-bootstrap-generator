@@ -58,6 +58,7 @@ def format_choice(key, val):
     else:
         return bs_option % {'value': key, 'label': val}
 
+
 def format_bs_field(model_name, field, flavour):
     field_id_html = model_name + '-' + field.name
 
@@ -128,6 +129,15 @@ def format_bs_field(model_name, field, flavour):
 
     return rendered_html
 
+
+def format_bs_form(fields, flavour):
+    rendered_html = bs_form % fields
+    if flavour == 'react':
+        rendered_html = rendered_html.replace('class=', 'className='). \
+            replace('for=', 'htmlFor=')
+    return rendered_html
+
+
 class Command(BaseCommand):
     args = '<app_name> <model_name>'
     help = 'Prints a bootstrap form for the supplied app & model'
@@ -153,4 +163,4 @@ class Command(BaseCommand):
 
         model_class = get_model(app_name, model_name)
         fields = [format_bs_field(model_name, field, flavour) for field in model_class._meta.fields if field.name != 'id']
-        self.stdout.write(bs_form % "".join(fields))
+        self.stdout.write(format_bs_form("".join(fields), flavour))
